@@ -30,7 +30,7 @@ const SignUp = () => {
             title="Account Name"
             value={form.accountname}
             handleChangeText={(e) => setForm({ ...form, accountname: e })}
-            otherStyles="mt-10 "
+            otherStyles="mt-10"
           />
           {/* formfield for email */}
           <FormField

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
+import CustomButton from "../../components/CustomButton";
 
 const SignUp = () => {
   const [form, setForm] = useState({
@@ -12,25 +13,22 @@ const SignUp = () => {
   });
 
   const [isSubmitting, setisSubmitting] = useState(false);
+
   const submit = () => {};
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View className="w-full justify-center min-h-[30vh] px-4 my-6">
-          <Image
-            source={images.logo}
-            resizeMode="contain"
-            className="w-[80px] h-[70px]"
-          />
           <Text className="text-2xl text-white text-semibold mt-10 font-psemibold">
-            Sign Up
+            Create Account in {""} <Text className="text-blue-400">SGCOA</Text>
           </Text>
           {/* formfield for username */}
           <FormField
             title="Account Name"
             value={form.accountname}
             handleChangeText={(e) => setForm({ ...form, accountname: e })}
-            otherStyles="mt-10"
+            otherStyles="mt-7"
           />
           {/* formfield for email */}
           <FormField
@@ -46,6 +44,12 @@ const SignUp = () => {
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles="mt-7"
+          />
+          <CustomButton
+            title={"Sign-Up"}
+            handlePress={submit}
+            containerStyles="mt-7"
+            isLoading={isSubmitting}
           />
         </View>
       </ScrollView>

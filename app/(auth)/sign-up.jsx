@@ -1,9 +1,9 @@
 import { View, Text, ScrollView, Image } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
+import {createUser} from '../../lib/appwrite'
 
 const SignUp = () => {
   const [form, setForm] = useState({
@@ -14,7 +14,10 @@ const SignUp = () => {
 
   const [isSubmitting, setisSubmitting] = useState(false);
 
-  const submit = () => {};
+  const submit = () => {
+    createUser();
+
+  };
 
   return (
     <SafeAreaView className="bg-primary h-full">

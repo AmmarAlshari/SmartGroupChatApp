@@ -28,7 +28,7 @@ export default function App() {
           </View>
           <CustomButton
           title={'Get Started'}
-          handlePress={()=> router.push('/sign-up')} 
+          handlePress={()=> router.push('/sign-in')} 
           containerStyles="w-full mt-10"/>
         </View>
       </ScrollView>

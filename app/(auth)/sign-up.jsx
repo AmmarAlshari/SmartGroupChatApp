@@ -79,7 +79,9 @@ const SignUp = () => {
             keyboardType="email-address"
           />
           {emailError && (
-            <Text className="text-red-500 mt-2 font-psemibold">Email must contain 'edu'.</Text>
+            <Text className="text-red-500 mt-2 font-psemibold">
+              Email must contain 'edu'.
+            </Text>
           )}
           <FormField
             title="Password"
@@ -93,7 +95,7 @@ const SignUp = () => {
           />
           {passwordError ? (
             <Text className="text-red-500 mt-2 font-psemibold ">
-              Password must contain one uppercase A-Z  and numbers 0-9.
+              Password must contain one uppercase A-Z and numbers 0-9.
             </Text>
           ) : (
             <Text className="text-green-500 mt-2 font-psemibold">

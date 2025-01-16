@@ -1,20 +1,46 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, Alert } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { images } from "../../constants";
+import { signIn, checkActiveSession, deleteSessions } from "../../lib/appwrite";
 
-const SignUp = () => {
+const SignIn = () => {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
-  const [isSubmitting, setisSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = () => {};
+  const submit = async () => {
+    if (form.email === "" || form.password === "") {
+      Alert.alert("Error", "Please fill in all fields");
+      return; // Exit early if validation fails
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Check for an active session
+      const activeSession = await checkActiveSession();
+
+      if (activeSession) {
+        // Delete the active sessions if one exists
+        await deleteSessions();
+      }
+      // Proceed with sign-in
+      await signIn(form.email, form.password);
+      Alert.alert("Success", "User signed in successfully");
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -66,4 +92,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignIn;

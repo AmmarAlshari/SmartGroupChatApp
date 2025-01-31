@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { databases, config } from '../lib/Chats';
-import { ID } from 'react-native-appwrite';
+import { ID, Query } from 'react-native-appwrite';
 
 const CreateGroup = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [sectionNumber, setSectionNumber] = useState("");
   const navigation = useNavigation();
 
   const handleOpenModal = () => {
@@ -17,25 +18,37 @@ const CreateGroup = () => {
     setModalVisible(false);
   };
 
-  const handleSubmit = () => {
-    databases.createDocument(
-      config.databaseId,
-      config.groupId,
-      ID.unique(),
-      {
-        name: groupName
+  const handleSubmit = async () => {
+    try {
+      const response = await databases.listDocuments(config.databaseId, config.groupId, [
+        Query.equal('name', groupName),
+        Query.equal('section', sectionNumber)
+      ]);
+
+      if (response.documents.length > 0) {
+        // Group already exists
+        const existingGroup = response.documents[0];
+        console.log("Existing Group:", existingGroup);
+        setModalVisible(false);
+        navigation.navigate('home', { groupId: existingGroup.$id }); // Navigate to Chats screen with existing group
+      } else {
+        // Create new group
+        const newGroup = await databases.createDocument(config.databaseId, config.groupId, ID.unique(), {
+          name: groupName,
+          section: sectionNumber,
+        });
+        console.log("New Group:", newGroup);
+        setModalVisible(false);
+        navigation.navigate('home', { groupId: newGroup.$id }); // Navigate to Chats screen with new group
       }
-    ).then(() => {
-      console.log("Group Name:", groupName);
-      setModalVisible(false);
-      navigation.navigate('Chats'); // Navigate to Chats screen
-    }).catch((error) => {
-      console.error("Error creating group:", error);
-    });
+    } catch (error) {
+      console.error("Error creating or finding group:", error);
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>Find your group</Text>
       <TouchableOpacity style={styles.openButton} onPress={handleOpenModal}>
         <Text style={styles.buttonText}>Find your group</Text>
       </TouchableOpacity>
@@ -49,8 +62,15 @@ const CreateGroup = () => {
             <Text style={styles.modalHeader}>Find your group</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter group name"
+              placeholder="Course Name"
+              placeholderTextColor="#888"
               onChangeText={(text) => setGroupName(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Section Number"
+              placeholderTextColor="#888"
+              onChangeText={(text) => setSectionNumber(text)}
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
@@ -72,6 +92,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 6,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#0088cc',
   },
   openButton: {
     backgroundColor: '#0088cc',
@@ -113,6 +140,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 20,
     paddingHorizontal: 10,
+    color: '#000', // Ensure text color is set
   },
   buttonContainer: {
     flexDirection: 'row',

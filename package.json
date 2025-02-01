@@ -12,6 +12,7 @@
     "@heroui/modal": "^2.2.8",
     "@heroui/system": "^2.4.7",
     "@heroui/theme": "^2.4.6",
+    "appwrite": "^17.0.0",
     "expo": "~52.0.24",
     "expo-constants": "~17.0.3",
     "expo-font": "~13.0.3",

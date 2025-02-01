@@ -1,14 +1,31 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Modal, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { databases, config } from '../lib/Chats';
-import { ID, Query } from 'react-native-appwrite';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { databases, config } from "../lib/Chats";
+import { ID, Query } from "react-native-appwrite";
+import { getCurrentUser } from "../lib/appwrite";
 
 const CreateGroup = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [sectionNumber, setSectionNumber] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+    };
+    fetchUser();
+  }, []);
 
   const handleOpenModal = () => {
     setModalVisible(true);
@@ -19,27 +36,36 @@ const CreateGroup = () => {
   };
 
   const handleSubmit = async () => {
+    if (!currentUser) return;
+
     try {
-      const response = await databases.listDocuments(config.databaseId, config.groupId, [
-        Query.equal('name', groupName),
-        Query.equal('section', sectionNumber)
-      ]);
+      const response = await databases.listDocuments(
+        config.databaseId,
+        config.groupId,
+        [Query.equal("name", groupName), Query.equal("section", sectionNumber)]
+      );
 
       if (response.documents.length > 0) {
         // Group already exists
         const existingGroup = response.documents[0];
         console.log("Existing Group:", existingGroup);
         setModalVisible(false);
-        navigation.navigate('home', { groupId: existingGroup.$id }); // Navigate to Chats screen with existing group
+        navigation.navigate("home", { groupId: existingGroup.$id }); // Navigate to ChatScreen with existing group
       } else {
         // Create new group
-        const newGroup = await databases.createDocument(config.databaseId, config.groupId, ID.unique(), {
-          name: groupName,
-          section: sectionNumber,
-        });
+        const newGroup = await databases.createDocument(
+          config.databaseId,
+          config.groupId,
+          ID.unique(),
+          {
+            name: groupName,
+            section: sectionNumber,
+            userId: currentUser.$id, // Use currentUser.$id
+          }
+        );
         console.log("New Group:", newGroup);
         setModalVisible(false);
-        navigation.navigate('home', { groupId: newGroup.$id }); // Navigate to Chats screen with new group
+        navigation.navigate("home", { groupId: newGroup.$id }); // Navigate to ChatScreen with new group
       }
     } catch (error) {
       console.error("Error creating or finding group:", error);
@@ -73,10 +99,16 @@ const CreateGroup = () => {
               onChangeText={(text) => setSectionNumber(text)}
             />
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit}
+              >
                 <Text style={styles.submitButtonText}>Submit</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.closeButton} onPress={handleCloseModal}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={handleCloseModal}
+              >
                 <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
             </View>
@@ -90,86 +122,88 @@ const CreateGroup = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    padding: 16,
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    color: '#0088cc',
+    color: "#0088cc",
+    alignSelf: "flex-start",
   },
   openButton: {
-    backgroundColor: '#0088cc',
+    backgroundColor: "#0088cc",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 25,
     elevation: 2,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
     width: 300,
-    alignItems: 'center',
+    alignItems: "center",
     elevation: 5,
   },
   modalHeader: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    color: '#0088cc',
+    color: "#0088cc",
   },
   input: {
-    width: '100%',
+    width: "100%",
     height: 40,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 20,
     paddingHorizontal: 10,
-    color: '#000', // Ensure text color is set
+    color: "#000", // Ensure text color is set
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
   submitButton: {
-    backgroundColor: '#0088cc',
+    backgroundColor: "#0088cc",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     elevation: 2,
   },
   submitButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     elevation: 2,
   },
   closeButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

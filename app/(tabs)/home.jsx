@@ -1,22 +1,31 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { databases, config } from "../../lib/Chats";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { databases, config } from "../../lib/Chats";
+import { getCurrentUser } from "../../lib/appwrite";
 import SearchInput from "../../components/SearchInput";
 import EmptyState from "../../components/EmptyState";
-import { useCallback } from "react";
-import { ID, Query } from 'react-native-appwrite';
 
 const Home = () => {
   const [groups, setGroups] = useState([]);
-  const [groupName, setGroupName] = useState("");
-  const [sectionNumber, setSectionNumber] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigation();
 
   const fetchGroups = async () => {
     try {
-      const response = await databases.listDocuments(config.databaseId, config.groupId);
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+      const response = await databases.listDocuments(
+        config.databaseId,
+        config.groupId
+      );
       setGroups(response.documents);
     } catch (error) {
       console.error("Error fetching groups:", error);
@@ -29,39 +38,17 @@ const Home = () => {
     }, [])
   );
 
-  const handleSubmit = async () => {
-    try {
-      const response = await databases.listDocuments(config.databaseId, config.groupId, [
-        Query.equal('name', groupName),
-        Query.equal('section', sectionNumber)
-      ]);
-
-      if (response.documents.length > 0) {
-        // Group already exists
-        const existingGroup = response.documents[0];
-        console.log("Existing Group:", existingGroup);
-        navigation.navigate('ChatScreen', { groupId: existingGroup.$id }); // Navigate to ChatScreen with existing group
-      } else {
-        // Create new group
-        const newGroup = await databases.createDocument(config.databaseId, config.groupId, ID.unique(), {
-          name: groupName,
-          section: sectionNumber,
-        });
-        console.log("New Group:", newGroup);
-        navigation.navigate('ChatScreen', { groupId: newGroup.$id }); // Navigate to ChatScreen with new group
-      }
-    } catch (error) {
-      console.error("Error creating or finding group:", error);
-    }
-  };
-
   const renderItem = ({ item }) => (
     <View style={styles.groupContainer}>
-      <Text style={styles.groupName} className="font-pregular text-2xl">{item.name}</Text>
-      <Text style={styles.sectionNumber} className="font-pregular text-2xl">Section: {item.section}</Text>
+      <Text style={styles.groupName} className="font-pregular text-2xl">
+        {item.name}
+      </Text>
+      <Text style={styles.sectionNumber} className="font-pregular text-2xl">
+        Section: {item.section}
+      </Text>
       <TouchableOpacity
         style={styles.chatButton}
-        onPress={() => navigation.navigate('ChatScreen', { groupId: item.$id })}
+        onPress={() => navigation.navigate("ChatScreen", { groupId: item.$id })}
       >
         <Text style={styles.chatButtonText}>Start Chatting</Text>
       </TouchableOpacity>
@@ -82,7 +69,7 @@ const Home = () => {
                   Welcome back
                 </Text>
                 <Text className="text-2xl font-psemibold text-blue-400">
-                  Ammar
+                  {currentUser?.name}
                 </Text>
               </View>
             </View>
@@ -107,32 +94,34 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   groupContainer: {
+    backgroundColor: "white",
     padding: 16,
+    borderRadius: 8,
     marginBottom: 16,
     elevation: 2,
   },
   groupName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 4,
   },
   sectionNumber: {
     fontSize: 16,
-    color: 'white',
+    color: "#666",
     marginBottom: 8,
   },
   chatButton: {
-    backgroundColor: 'blue',
+    backgroundColor: "#25D366",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   chatButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

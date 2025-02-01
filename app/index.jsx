@@ -8,7 +8,6 @@ import CustomButton from "../components/CustomButton";
 import { useGlobalContext } from "../context/GlobalProvider";
 // onboarding screen the main screen
 export default function App() {
-
   const { loading, isLogged } = useGlobalContext();
   if (!loading && isLogged) return <Redirect href="/home" />;
   return (
@@ -31,12 +30,13 @@ export default function App() {
             </Text>
           </View>
           <CustomButton
-          title={'Get Started'}
-          handlePress={()=> router.push('/sign-in')} 
-          containerStyles="w-full mt-10"/>
+            title={"Get Started"}
+            handlePress={() => router.push("/sign-in")}
+            containerStyles="w-full mt-10"
+          />
         </View>
       </ScrollView>
-      <StatusBar backgroundColor="#161622" style="light"/>
+      <StatusBar backgroundColor="#161622" style="light" />
     </SafeAreaView>
   );
 }

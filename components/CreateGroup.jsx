@@ -49,6 +49,19 @@ const CreateGroup = () => {
         // Group already exists
         const existingGroup = response.documents[0];
         console.log("Existing Group:", existingGroup);
+
+        // Add current user to the group's participants if not already added
+        if (!existingGroup.participants.includes(currentUser.$id)) {
+          await databases.updateDocument(
+            config.databaseId,
+            config.groupId,
+            existingGroup.$id,
+            {
+              participants: [...existingGroup.participants, currentUser.$id],
+            }
+          );
+        }
+
         setModalVisible(false);
         navigation.navigate("home", { groupId: existingGroup.$id }); // Navigate to ChatScreen with existing group
       } else {
@@ -61,6 +74,7 @@ const CreateGroup = () => {
             name: groupName,
             section: sectionNumber,
             userId: currentUser.$id, // Use currentUser.$id
+            participants: [currentUser.$id], // Add current user to participants
           }
         );
         console.log("New Group:", newGroup);

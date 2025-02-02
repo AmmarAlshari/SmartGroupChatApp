@@ -5,10 +5,12 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { databases, config } from "../../lib/Chats";
+import { ID, Query } from "react-native-appwrite";
 import { getCurrentUser } from "../../lib/appwrite";
 import SearchInput from "../../components/SearchInput";
 import EmptyState from "../../components/EmptyState";
@@ -16,6 +18,7 @@ import EmptyState from "../../components/EmptyState";
 const Home = () => {
   const [groups, setGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
   const fetchGroups = async () => {
@@ -24,13 +27,19 @@ const Home = () => {
       setCurrentUser(user);
       const response = await databases.listDocuments(
         config.databaseId,
-        config.groupId
+        config.groupId,
+        [Query.search("participants", user.$id)]
       );
       setGroups(response.documents);
     } catch (error) {
       console.error("Error fetching groups:", error);
     }
   };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchGroups().then(() => setRefreshing(false));
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -61,6 +70,9 @@ const Home = () => {
         data={groups}
         keyExtractor={(item) => item.$id}
         renderItem={renderItem}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         ListHeaderComponent={() => (
           <View className="my-6 px-4 space-y-6">
             <View className="justify-between items-start flex-row mb-6">

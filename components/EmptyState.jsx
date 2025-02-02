@@ -4,7 +4,7 @@ import { images } from "../constants";
 import CustomButton from "./CustomButton";
 import { router } from "expo-router";
 
-const EmptyState = ({ title, subtitle }) => {
+const EmptyState = ({ title, description }) => {
   return (
     <View className="justify-center items-center p-4 my-10">
       <Image
@@ -12,12 +12,12 @@ const EmptyState = ({ title, subtitle }) => {
         className="w-[270px] h-[215]"
         resizeMode="contain"
       />
-      <Text className="font-psemibold text-xl text-center text-gray-100 mt-5">
-        {title}
+      <Text className="font-psemibold text-xl text-gray-100 mt-5">{title}</Text>
+      <Text className="font-pmedium text-sm text-gray-100 text-center mt-2">
+        {description}
       </Text>
-      <Text className="font-pmedium text-sm text-gray-100">{subtitle}</Text>
       <CustomButton
-        title="Create or Join group chat"
+        title="Find Your Group"
         handlePress={() => router.push("/CreateJoin")}
         containerStyles="w-full my-6"
       />

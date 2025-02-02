@@ -5,7 +5,6 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Alert,
@@ -15,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { databases, config } from "../lib/Chats";
 import { ID, Query } from "react-native-appwrite";
 import { getCurrentUser } from "../lib/appwrite";
+import MessageBody from "../components/MessageBody";
 
 const ChatScreen = () => {
   const route = useRoute();
@@ -23,13 +23,17 @@ const ChatScreen = () => {
   const [newMessage, setNewMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [groupName, setGroupName] = useState("");
+  const [sectionNumber, setSectionNumber] = useState("");
+  const [editingMessage, setEditingMessage] = useState(null);
 
+  // Fetch messages, current user, and group name when the component mounts
   useEffect(() => {
     fetchMessages();
     fetchCurrentUser();
-    fetchGroupName();
+    fetchGroupDetails();
   }, []);
 
+  // Fetch messages for the group
   const fetchMessages = async () => {
     try {
       const response = await databases.listDocuments(
@@ -43,6 +47,7 @@ const ChatScreen = () => {
     }
   };
 
+  // Fetch the current user
   const fetchCurrentUser = async () => {
     try {
       const user = await getCurrentUser();
@@ -52,222 +57,142 @@ const ChatScreen = () => {
     }
   };
 
-  const fetchGroupName = async () => {
+  // Fetch the group details
+  const fetchGroupDetails = async () => {
     try {
-      const response = await databases.getDocument(config.databaseId, config.groupId, groupId);
+      const response = await databases.getDocument(
+        config.databaseId,
+        config.groupId,
+        groupId
+      );
       setGroupName(response.name);
+      setSectionNumber(response.section);
     } catch (error) {
-      console.error("Error fetching group name:", error);
+      console.error("Error fetching group details:", error);
     }
   };
 
+  // Handle sending a new message or editing an existing message
   const handleSendMessage = async () => {
     if (!currentUser) return;
 
-    try {
-      await databases.createDocument(
-        config.databaseId,
-        config.messagesCollectionId,
-        ID.unique(),
-        {
-          groupId: groupId,
-          senderId: currentUser.$id,
-          senderName: currentUser.username,
-          body: newMessage,
-          timestamp: new Date().toISOString(),
-        }
-      );
-      setNewMessage("");
-      fetchMessages();
-    } catch (error) {
-      console.error("Error sending message:", error);
+    if (editingMessage) {
+      // Edit existing message
+      try {
+        await databases.updateDocument(
+          config.databaseId,
+          config.messagesCollectionId,
+          editingMessage.$id,
+          {
+            body: newMessage,
+            edited: true,
+          }
+        );
+        setEditingMessage(null);
+        setNewMessage("");
+        fetchMessages();
+      } catch (error) {
+        console.error("Error editing message:", error);
+      }
+    } else {
+      // Send new message
+      try {
+        await databases.createDocument(
+          config.databaseId,
+          config.messagesCollectionId,
+          ID.unique(),
+          {
+            groupId: groupId,
+            senderId: currentUser.$id,
+            senderName: currentUser.username,
+            body: newMessage,
+            timestamp: new Date().toISOString(),
+            edited: false, // Initialize edited as false for new messages
+          }
+        );
+        setNewMessage("");
+        fetchMessages();
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 
+  // Handle deleting a message
   const handleDeleteMessage = async (messageId) => {
     try {
-      await databases.deleteDocument(config.databaseId, config.messagesCollectionId, messageId);
+      await databases.deleteDocument(
+        config.databaseId,
+        config.messagesCollectionId,
+        messageId
+      );
       fetchMessages();
     } catch (error) {
       console.error("Error deleting message:", error);
     }
   };
 
-  const handleEditMessage = async (messageId, newBody) => {
-    try {
-      await databases.updateDocument(config.databaseId, config.messagesCollectionId, messageId, {
-        body: newBody,
-      });
-      fetchMessages();
-    } catch (error) {
-      console.error("Error editing message:", error);
-    }
+  // Handle editing a message
+  const handleEditMessage = (message) => {
+    Alert.alert(
+      "Edit Message",
+      "Do you want to edit this message?",
+      [
+        { text: "No", style: "cancel" },
+        {
+          text: "Yes",
+          onPress: () => {
+            setEditingMessage(message);
+            setNewMessage(message.body);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
-  const renderItem = ({ item }) => (
-    <View
-      style={[
-        styles.messageContainer,
-        item.senderId === currentUser?.$id
-          ? styles.otherMessage
-          : styles.myMessage,
-      ]}
-    >
-      <Text style={styles.senderName}>{item.senderName}</Text>
-      <Text style={styles.messageText}>{item.body}</Text>
-      <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleTimeString()}</Text>
-      {item.senderId === currentUser?.$id && (
-        <View style={styles.messageActions}>
-          <TouchableOpacity
-            onPress={() => {
-              Alert.prompt(
-                "Edit Message",
-                "Enter new message:",
-                [
-                  {
-                    text: "Cancel",
-                    style: "cancel",
-                  },
-                  {
-                    text: "Save",
-                    onPress: (newBody) => handleEditMessage(item.$id, newBody),
-                  },
-                ],
-                {
-                  cancelable: true,
-                  onDismiss: () => {},
-                }
-              );
-            }}
-          >
-            <Text style={styles.actionText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleDeleteMessage(item.$id)}>
-            <Text style={styles.actionText}>Delete</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView className="bg-primary flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        className="flex-1"
       >
-        <View style={styles.header}>
-          <Text style={styles.headerText}>{groupName}</Text>
+        <View className="p-4 bg-blue-400 items-center flex-row">
+          <Text className="text-lg font-pmedium text-white">{`${groupName} - ${sectionNumber}`}</Text>
         </View>
         <FlatList
           data={messages}
           keyExtractor={(item) => item.$id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <MessageBody
+              item={item}
+              currentUser={currentUser}
+              handleEditMessage={handleEditMessage}
+              handleDeleteMessage={handleDeleteMessage}
+            />
+          )}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
           inverted
         />
-        <View style={styles.inputContainer}>
+        <View className="flex-row p-4 bg-white border-gray-300">
           <TextInput
-            style={styles.input}
+            className="flex-1 h-10 border border-gray-300 rounded px-2 mr-2"
             placeholder="Type a message"
             value={newMessage}
             onChangeText={setNewMessage}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-            <Text style={styles.sendButtonText}>Send</Text>
+          <TouchableOpacity
+            className="bg-green-500 py-2 px-4 rounded"
+            onPress={handleSendMessage}
+          >
+            <Text className="text-white font-bold">
+              {editingMessage ? "Edit" : "Send"}
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    padding: 16,
-    backgroundColor: "#0088cc",
-    alignItems: "center",
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  messageContainer: {
-    maxWidth: "80%",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 2,
-  },
-  myMessage: {
-    backgroundColor: "#DCF8C6",
-    alignSelf: "flex-end",
-  },
-  otherMessage: {
-    backgroundColor: "white",
-    alignSelf: "flex-start",
-  },
-  senderName: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  messageText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  timestamp: {
-    fontSize: 10,
-    color: "#999",
-    alignSelf: "flex-end",
-  },
-  messageActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 5,
-  },
-  actionText: {
-    fontSize: 12,
-    color: "#0088cc",
-    marginLeft: 10,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 16,
-    backgroundColor: "white",
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
-  },
-  sendButton: {
-    backgroundColor: "#25D366",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sendButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
 
 export default ChatScreen;

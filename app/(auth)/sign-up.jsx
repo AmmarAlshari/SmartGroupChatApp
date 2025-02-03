@@ -47,7 +47,10 @@ const SignUp = () => {
     setIsSubmitting(true);
     try {
       const result = await createUser(form.email, form.password, form.username);
-      router.replace("/home");
+      console.log(result);
+
+      router.replace("/Verification");
+      Alert.alert("Verification Email Sent", "Please check your email to verify your account.");
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {

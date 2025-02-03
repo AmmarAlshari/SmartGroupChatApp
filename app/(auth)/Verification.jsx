@@ -1,0 +1,90 @@
+import React, { useEffect, useState } from "react";
+import { View, Text, ActivityIndicator, Button } from "react-native";
+import { useRoute } from "@react-navigation/native";
+import { account } from "../../lib/appwrite"; // Adjust the import based on your project structure
+import { useRouter } from "expo-router";
+
+const Verification = () => {
+  const route = useRoute();
+  const router = useRouter();
+  const { userId, secret } = route.params || {}; // Ensure params are defined
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
+
+  useEffect(() => {
+    const verifyEmail = async () => {
+      if (!userId || !secret) {
+        setMessage("Missing userId or secret.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log(
+          "Verifying email with userId:",
+          userId,
+          "and secret:",
+          secret
+        );
+        await account.updateVerification(userId, secret);
+        setMessage("Email verified successfully!");
+        setIsVerified(true);
+      } catch (error) {
+        console.error("Verification failed:", error);
+        setMessage("Failed to verify email.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyEmail();
+  }, [userId, secret]);
+
+  useEffect(() => {
+    if (!loading && message === "Email verified successfully!") {
+      router.push("/home"); // Navigate to the home screen or any other screen
+    }
+  }, [loading, message, router]);
+
+  useEffect(() => {
+    const checkEmailVerification = async () => {
+      try {
+        const user = await account.get();
+        if (user.emailVerification) {
+          setIsVerified(true);
+          setMessage("Email verified successfully!");
+        }
+      } catch (error) {
+        console.error("Failed to get current user:", error);
+      }
+    };
+
+    const intervalId = setInterval(checkEmailVerification, 5000); // Check every 5 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+  }, []);
+
+  return (
+    <View className="flex-1 justify-center items-center bg-primary">
+      {loading ? (
+        <>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text className="text-lg">Verifying your email...</Text>
+        </>
+      ) : (
+        <>
+          <Text className="text-2xl text-white font-psemibold">{message}</Text>
+          {isVerified && (
+            <Button
+              title="Go to Sign In"
+              onPress={() => router.push("/sign-in")}
+            />
+          )}
+        </>
+      )}
+    </View>
+  );
+};
+
+export default Verification;

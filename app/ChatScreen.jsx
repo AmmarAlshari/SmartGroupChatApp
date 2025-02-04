@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Image,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,6 +16,9 @@ import { databases, config } from "../lib/Chats";
 import { ID, Query } from "react-native-appwrite";
 import { getCurrentUser } from "../lib/appwrite";
 import MessageBody from "../components/MessageBody";
+import icons from "../constants/icons";
+import images from "../constants/images";
+import { router } from "expo-router";
 
 const ChatScreen = () => {
   const route = useRoute();
@@ -25,7 +29,6 @@ const ChatScreen = () => {
   const [groupName, setGroupName] = useState("");
   const [sectionNumber, setSectionNumber] = useState("");
   const [editingMessage, setEditingMessage] = useState(null);
-
   // Fetch messages, current user, and group name when the component mounts
   useEffect(() => {
     fetchMessages();
@@ -157,8 +160,26 @@ const ChatScreen = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <View className="p-4 bg-blue-400 items-center flex-row">
-          <Text className="text-lg font-pmedium text-white">{`${groupName} - ${sectionNumber}`}</Text>
+        <View
+          className="px-5 items-center flex-row justify-between"
+          style={{ backgroundColor: "rgba(44, 44, 44, 0.1)" }}
+        >
+          <TouchableOpacity onPress={() => router.push("home")}>
+            <Image
+              source={icons.leftArrow}
+              className="w-6 h-6"
+              resizeMode="contain"
+              style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
+            />
+          </TouchableOpacity>
+
+          <Text className="text-lg font-pregular text-white">{`${groupName} - ${sectionNumber}`}</Text>
+          <Image
+            source={images.logo}
+            className="w-20 h-20"
+            resizeMode="contain"
+            style={Platform.OS === "web" ? { width: 55, height: 70 } : {}}
+          />
         </View>
         <FlatList
           data={messages}
@@ -174,19 +195,32 @@ const ChatScreen = () => {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
           inverted
         />
-        <View className="flex-row p-4 bg-white border-gray-300">
+        <View
+          className="flex-row py-2  border-gray-300 items-center justify-center"
+          style={{ backgroundColor: "rgba(44, 44, 44, 0.1)" }}
+        >
           <TextInput
-            className="flex-1 h-10 border border-gray-300 rounded px-2 mr-2"
-            placeholder="Type a message"
+            className="flex-1 h-11 items-center text-white font-pmedium rounded-full px-3 mr-4 ml-4 text-sm"
+            style={{ backgroundColor: "rgba(44, 44, 44, 0.2)" }}
+            placeholder=""
             value={newMessage}
             onChangeText={setNewMessage}
           />
           <TouchableOpacity
-            className="bg-green-500 py-2 px-4 rounded"
+            className="py-4 px-6 mr-2"
             onPress={handleSendMessage}
           >
-            <Text className="text-white font-bold">
-              {editingMessage ? "Edit" : "Send"}
+            <Text className="text-white font-pregular">
+              {editingMessage ? (
+                "Edit"
+              ) : (
+                <Image
+                  source={icons.bookmark}
+                  className="w-6 h-6"
+                  resizeMode="contain"
+                  style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
+                />
+              )}
             </Text>
           </TouchableOpacity>
         </View>

@@ -134,6 +134,11 @@ const GroupItem = ({ item, currentUser, fetchGroups }) => {
           </Text>
         )}
       </TouchableOpacity>
+      <Image
+        source={icons.groups}
+        className="w-7 h-7 m-2 border"
+        style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
+      />
       {hasNewMessages && (
         <View className="bg-green-500 w-3 h-3 rounded-full ml-2" />
       )}

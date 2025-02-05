@@ -15,6 +15,7 @@ const Verification = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       if (!userId || !secret) {
+        // checks if userId or secret is missing
         setMessage("Missing userId or secret.");
         setLoading(false);
         return;
@@ -27,6 +28,7 @@ const Verification = () => {
           "and secret:",
           secret
         );
+        // updateVerification is a method from the Appwrite SDK passing the userId and secret
         await account.updateVerification(userId, secret);
         setMessage("Email verified successfully!");
         setIsVerified(true);
@@ -43,11 +45,13 @@ const Verification = () => {
 
   useEffect(() => {
     if (!loading && message === "Email verified successfully!") {
-      router.push("/home"); // Navigate to the home screen or any other screen
+      // Check if the email is verified and no loading
+      router.push("/home");
     }
   }, [loading, message, router]);
 
   useEffect(() => {
+    // Check if the email is verified every 5 seconds
     const checkEmailVerification = async () => {
       try {
         const user = await account.get();

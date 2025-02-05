@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { Image, ScrollView, Text, View } from "react-native";
+import { Image, Platform, ScrollView, Text, View } from "react-native";
 import { Redirect, router } from "expo-router";
 import "../global.css";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +18,7 @@ export default function App() {
             source={images.logo}
             className="w-[130px] h-[130px]"
             resizeMode="contain"
+            style={Platform.OS === "web" ? { width: 200, height: 200 } : {}}
           />
           <View className="relative mt-1">
             <Text className="text-3xl text-white font-bold text-center">

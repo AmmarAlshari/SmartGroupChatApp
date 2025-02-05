@@ -147,21 +147,31 @@ const ChatScreen = () => {
 
   // Handle editing a message
   const handleEditMessage = (message) => {
-    Alert.alert(
-      "Edit Message",
-      "Do you want to edit this message?",
-      [
-        { text: "No", style: "cancel" },
-        {
-          text: "Yes",
-          onPress: () => {
-            setEditingMessage(message);
-            setNewMessage(message.body);
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Edit Message: Do you want to edit this message?"
+      );
+      if (confirmed) {
+        setEditingMessage(message);
+        setNewMessage(message.body);
+      }
+    } else {
+      Alert.alert(
+        "Edit Message",
+        "Do you want to edit this message?",
+        [
+          { text: "No", style: "cancel" },
+          {
+            text: "Yes",
+            onPress: () => {
+              setEditingMessage(message);
+              setNewMessage(message.body);
+            },
           },
-        },
-      ],
-      { cancelable: true }
-    );
+        ],
+        { cancelable: true }
+      );
+    }
   };
 
   return (

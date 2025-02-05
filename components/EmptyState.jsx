@@ -1,4 +1,4 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Platform } from "react-native";
 import React from "react";
 import { images } from "../constants";
 import CustomButton from "./CustomButton";
@@ -10,6 +10,7 @@ const EmptyState = ({ title, description }) => {
       <Image
         source={images.empty}
         className="w-[270px] h-[215]"
+        style={Platform.OS === "web" ? { width: 300, height: 250 } : {}}
         resizeMode="contain"
       />
       <Text className="font-psemibold text-xl text-gray-100 mt-5">{title}</Text>

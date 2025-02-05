@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Alert, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  Image,
+  Platform,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { databases, config } from "../lib/Chats";
 import icons from "../constants/icons";
@@ -70,10 +77,19 @@ const GroupItem = ({ item, currentUser, fetchGroups }) => {
   };
 
   const confirmLeaveGroup = () => {
-    Alert.alert("Leave Group", "Are you sure you want to leave the group?", [
-      { text: "No", style: "cancel" },
-      { text: "Yes", onPress: handleLeaveGroup },
-    ]);
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Leave Group: Are you sure you want to leave the group?"
+      );
+      if (confirmed) {
+        handleLeaveGroup();
+      }
+    } else {
+      Alert.alert("Leave Group", "Are you sure you want to leave the group?", [
+        { text: "No", style: "cancel" },
+        { text: "Yes", onPress: handleLeaveGroup },
+      ]);
+    }
   };
 
   const handleJoinGroup = async () => {
@@ -122,7 +138,11 @@ const GroupItem = ({ item, currentUser, fetchGroups }) => {
         <View className="bg-green-500 w-3 h-3 rounded-full ml-2" />
       )}
       <TouchableOpacity onPress={confirmLeaveGroup} className="ml-2 p-2">
-        <Image source={icons.logout} className="w-6 h-6" />
+        <Image
+          source={icons.logout}
+          className="w-6 h-6"
+          style={Platform.OS === "web" ? { width: 30, height: 30 } : {}}
+        />
       </TouchableOpacity>
     </View>
   );

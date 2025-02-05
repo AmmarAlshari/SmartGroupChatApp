@@ -34,6 +34,16 @@ const ChatScreen = () => {
     fetchMessages();
     fetchCurrentUser();
     fetchGroupDetails();
+
+    // Set up polling to fetch messages every 3 seconds
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 3000);
+
+    // Clean up interval on unmount
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   // Fetch messages for the group

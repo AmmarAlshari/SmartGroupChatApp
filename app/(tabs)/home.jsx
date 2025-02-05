@@ -44,7 +44,6 @@ const Home = () => {
       setGroups(groupsWithLastMessage);
       setFilteredGroups(groupsWithLastMessage);
     } catch (error) {
-      console.error("Error fetching user or groups:", error);
     }
   };
 
@@ -96,7 +95,7 @@ const Home = () => {
                   Welcome back
                 </Text>
                 <Text className="text-2xl font-semibold text-blue-400">
-                  {currentUser?.name}
+                  {currentUser?.username}
                 </Text>
               </View>
             </View>

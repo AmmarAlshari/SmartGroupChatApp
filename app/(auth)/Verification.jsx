@@ -60,7 +60,6 @@ const Verification = () => {
           setMessage("Email verified successfully!");
         }
       } catch (error) {
-        console.error("Failed to get current user:", error);
       }
     };
 

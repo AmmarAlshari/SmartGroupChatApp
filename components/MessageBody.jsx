@@ -21,7 +21,10 @@ const MessageBody = ({
       <Text className="text-base text-gray-800 font-semibold">{item.body}</Text>
       {item.edited && <Text className="text-xs text-gray-500">edited</Text>}
       <Text className="text-xs text-gray-500">
-        {new Date(item.timestamp).toLocaleTimeString()}
+        {new Date(item.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
       </Text>
       {item.senderId === currentUser?.$id && (
         <View className="flex-row justify-end mt-1 space-x-4">

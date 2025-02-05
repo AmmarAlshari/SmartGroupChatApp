@@ -38,7 +38,7 @@ const ChatScreen = () => {
     // Set up polling to fetch messages every 3 seconds
     const interval = setInterval(() => {
       fetchMessages();
-    }, 3000);
+    }, 2000);
 
     // Clean up interval on unmount
     return () => {
@@ -55,9 +55,7 @@ const ChatScreen = () => {
         [Query.equal("groupId", groupId), Query.orderDesc("timestamp")]
       );
       setMessages(response.documents);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
+    } catch (error) {}
   };
 
   // Fetch the current user
@@ -65,9 +63,7 @@ const ChatScreen = () => {
     try {
       const user = await getCurrentUser();
       setCurrentUser(user);
-    } catch (error) {
-      console.error("Error fetching current user:", error);
-    }
+    } catch (error) {}
   };
 
   // Fetch the group details
@@ -80,9 +76,7 @@ const ChatScreen = () => {
       );
       setGroupName(response.name);
       setSectionNumber(response.section);
-    } catch (error) {
-      console.error("Error fetching group details:", error);
-    }
+    } catch (error) {}
   };
 
   // Handle sending a new message or editing an existing message
@@ -104,9 +98,7 @@ const ChatScreen = () => {
         setEditingMessage(null);
         setNewMessage("");
         fetchMessages();
-      } catch (error) {
-        console.error("Error editing message:", error);
-      }
+      } catch (error) {}
     } else {
       // Send new message
       try {
@@ -125,9 +117,7 @@ const ChatScreen = () => {
         );
         setNewMessage("");
         fetchMessages();
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
+      } catch (error) {}
     }
   };
 
@@ -140,9 +130,7 @@ const ChatScreen = () => {
         messageId
       );
       fetchMessages();
-    } catch (error) {
-      console.error("Error deleting message:", error);
-    }
+    } catch (error) {}
   };
 
   // Handle editing a message

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Alert, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { databases, config } from "../../lib/Chats";
 import { ID, Query } from "react-native-appwrite";
@@ -7,6 +15,8 @@ import { getCurrentUser } from "../../lib/appwrite";
 import CreateField from "../../components/CreateField";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../../components/CustomButton";
+import { icons } from "../../constants";
+import { router } from "expo-router";
 
 const CreateJoin = () => {
   const [groupName, setGroupName] = useState("");
@@ -94,10 +104,22 @@ const CreateJoin = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <ScrollView className="p-4 my-6">
-        <Text className="text-2xl font-psemibold text-white ">
-          Find Your Group
-        </Text>
+      <ScrollView className="p-4 my-2">
+        <View className="flex-row items-center px-2">
+          <TouchableOpacity onPress={() => router.push("home")}>
+            <Image
+              source={icons.leftArrow}
+              className="w-6 h-6"
+              resizeMode="contain"
+              style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
+            />
+          </TouchableOpacity>
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-2xl font-psemibold text-white">
+              Find Your Group
+            </Text>
+          </View>
+        </View>
         <View className="rounded-lg justify-center my-10">
           <CreateField
             title="Course Name"

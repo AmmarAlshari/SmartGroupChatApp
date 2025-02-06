@@ -175,6 +175,7 @@ const Profile = () => {
             source={icons.github}
             className="w-9 h-9 mb-5 items-center justify-center"
             resizeMode="contain"
+            style={Platform.OS === "web" ? { width: 30, height: 30 } : {}}
           />
         </TouchableOpacity>
       </ScrollView>

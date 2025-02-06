@@ -29,20 +29,28 @@ const Profile = () => {
   const [groupCount, setGroupCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   // Fetch the current user and their groups when the component mounts
+  // Function to generate avatar URL based on username
+  const generateAvatarUrl = (name) => {
+    return `https://cloud.appwrite.io/v1/avatars/initials?name=${name}&project=${config.projectId}`;
+  };
   const fetchUserAndGroups = async () => {
     try {
       const user = await getCurrentUser();
       setUserId(user.$id);
       setUsername(user.username);
+      setAvatarUrl(generateAvatarUrl(user.username)); // Set the avatar URL
       const response = await databases.listDocuments(
         config.databaseId,
         config.groupId,
         [Query.search("participants", user.$id)]
       );
       setGroupCount(response.documents.length);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error fetching user and groups:", error);
+    }
   };
 
   useEffect(() => {
@@ -52,11 +60,16 @@ const Profile = () => {
   // Function to handle changing the username
   const handleUsernameChange = async () => {
     try {
+      setIsLoading(true);
       await updateUsername(userId, newUsername);
+      setAvatarUrl(generateAvatarUrl(newUsername));
       setUsername(newUsername);
       Alert.alert("Success", "Username changed successfully!");
     } catch (error) {
+      console.error("Error updating username:", error);
       Alert.alert("Error", "Failed to change username.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -76,14 +89,14 @@ const Profile = () => {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView className="bg-primary h-full justify-center">
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View className=" flex-1 justify-center items-center flex-row p-6">
+        <View className=" flex-1 justify-center items-start flex-row m-3 ">
           <TouchableOpacity
             onPress={() => router.push("home")}
             className="absolute left-5"
@@ -104,16 +117,16 @@ const Profile = () => {
             />
           </TouchableOpacity>
         </View>
-        <View className="justify-center items-center m-3 p-2">
-          <Text className="text-xl text-blue-400 font-psemibold my-2">
+        <View className="justify-center items-center p-10">
+          <Text className="text-2xl text-blue-400 font-psemibold my-2">
             Welcome
           </Text>
           <Text className="text-white font-psemibold text-3xl">{username}</Text>
         </View>
-        <View className="justify-center items-center m-5">
-          <View className="w-16 h-16">
+        <View className="justify-center items-center flex-1 ">
+          <View className="w-20 h-20 border border-blue-400 rounded-lg items-center justify-center">
             <Image
-              source={icons.groups}
+              source={{ uri: avatarUrl }} // Use the avatar URL
               className="w-[90%] h-[90%]"
               resizeMode="contain"
               style={
@@ -121,42 +134,49 @@ const Profile = () => {
               }
             />
           </View>
-          <Text className="text-white font-psemibold my-3">
-            Your Groups!{" "}
-            <Text className="text-blue-400 text-xl font-bold">
+          <Text
+            className="text-white font-psemibold my-10"
+            style={Platform.OS === "web" ? { margin: 20 } : {}}
+          >
+            Total group chats {" "}
+            <Text className="text-blue-400 text-medium font-bold text-center items-center">
               {groupCount}
             </Text>
           </Text>
         </View>
 
-        <View className="my-6 p-4">
+        <View className="my-9 p-4">
           <ChangeUsername
             title="Change your username"
             value={newUsername}
-            placeholder="Enter new username"
+            placeholder=""
             handleChangeText={setNewUsername}
           />
           <CustomButton
             title="Show your new username!"
             handlePress={handleUsernameChange}
             isLoading={isLoading}
-            containerStyles="my-10"
+            containerStyles="my-8"
           />
         </View>
-        <View className="justify-center items-center border border-gray-300 p-2 rounded-xl">
-          <Text className="text-white text-xl font-pregular text-center">
-            Thank you for supporting my senior year project!
+        <View className="justify-center items-center">
+          <Text className="text-white text-base font-pextrabold text-center">
+            Thank you for the support for senior year project!
           </Text>
-          <Text className="text-white text-sx font-pregular my-2">
+          <Text className="text-white text-sx font-pextrabold my-2">
             For more details and new projects, visit my{" "}
-            <Text
-              onPress={() => Linking.openURL("https://github.com/AmmarAlshari")}
-              className="text-blue-400 font-bold text-xl text-center"
-            >
-              GitHub
-            </Text>
           </Text>
         </View>
+        <TouchableOpacity
+          className="items-center justify-center px-2"
+          onPress={() => Linking.openURL("https://github.com/AmmarAlshari")}
+        >
+          <Image
+            source={icons.github}
+            className="w-9 h-9 mb-5 items-center justify-center"
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

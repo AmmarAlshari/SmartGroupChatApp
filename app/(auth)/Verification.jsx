@@ -16,7 +16,7 @@ const Verification = () => {
     const verifyEmail = async () => {
       if (!userId || !secret) {
         // checks if userId or secret is missing
-        setMessage("Missing userId or secret.");
+        setMessage("Verifeing Account ...");
         setLoading(false);
         return;
       }
@@ -46,7 +46,7 @@ const Verification = () => {
   useEffect(() => {
     if (!loading && message === "Email verified successfully!") {
       // Check if the email is verified and no loading
-      router.push("/home");
+      router.replace("/home");
     }
   }, [loading, message, router]);
 
@@ -59,11 +59,10 @@ const Verification = () => {
           setIsVerified(true);
           setMessage("Email verified successfully!");
         }
-      } catch (error) {
-      }
+      } catch (error) {}
     };
 
-    const intervalId = setInterval(checkEmailVerification, 5000); // Check every 5 seconds
+    const intervalId = setInterval(checkEmailVerification, 10000); // Check every 10 seconds
 
     return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);

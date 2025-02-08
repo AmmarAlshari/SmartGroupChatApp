@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { databases, config } from "../../lib/Chats";
+import { databases, config, RealtimeEvent } from "../../lib/Chats";
 import { Query } from "react-native-appwrite";
 import { getCurrentUser } from "../../lib/appwrite";
 import SearchInput from "../../components/SearchInput";
@@ -43,8 +43,7 @@ const Home = () => {
       );
       setGroups(groupsWithLastMessage);
       setFilteredGroups(groupsWithLastMessage);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   // Handle pull-to-refresh functionality
@@ -71,6 +70,20 @@ const Home = () => {
       setFilteredGroups(groups);
     }
   };
+  // handlinig the realtime event for the last message
+  useEffect(() => {
+    const unsubscribe = RealtimeEvent((response) => {
+      if (
+        response.events.includes("databases.*.collections.*.documents.*.create")
+      ) {
+        fetchUserAndGroups();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <SafeAreaView className="bg-primary flex-1">

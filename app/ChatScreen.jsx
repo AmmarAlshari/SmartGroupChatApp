@@ -12,7 +12,13 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { databases, config, handleFilePick } from "../lib/Chats";
+import {
+  databases,
+  config,
+  handleFilePick,
+  RealtimeEvent,
+  RealtimeFileEvent,
+} from "../lib/Chats";
 import { ID, Query } from "react-native-appwrite";
 import { getCurrentUser } from "../lib/appwrite";
 import MessageBody from "../components/MessageBody";
@@ -35,14 +41,31 @@ const ChatScreen = () => {
     fetchCurrentUser();
     fetchGroupDetails();
 
-    // Set up polling to fetch messages every 4 seconds
-    const interval = setInterval(() => {
-      fetchMessages();
-    }, 4000);
+    // Subscribe to real-time updates
+    const unsubscribeMessages = RealtimeEvent((response) => {
+      if (
+        response.events.includes(
+          "databases.*.collections.*.documents.*.create"
+        ) ||
+        response.events.includes(
+          "databases.*.collections.*.documents.*.update"
+        ) ||
+        response.events.includes("databases.*.collections.*.documents.*.delete")
+      ) {
+        fetchMessages();
+      }
+    });
 
-    // Clean up interval on unmount
+    // Subscribe to file events
+    const unsubscribeFiles = RealtimeFileEvent((response) => {
+      if (response.events.includes("buckets.*.files.*.create")) {
+      }
+    });
+
+    // Clean up subscription on unmount
     return () => {
-      clearInterval(interval);
+      unsubscribeMessages();
+      unsubscribeFiles();
     };
   }, []);
 
@@ -228,10 +251,7 @@ const ChatScreen = () => {
             value={newMessage}
             onChangeText={setNewMessage}
           />
-          <TouchableOpacity
-            className="p-3 m-1"
-            onPress={handleSendMessage}
-          >
+          <TouchableOpacity className="p-3 m-1" onPress={handleSendMessage}>
             <Text className="text-white font-pregular">
               {editingMessage ? (
                 "Edit"

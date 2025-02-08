@@ -70,7 +70,7 @@ const TabsLayout = () => {
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabsIcon
-                icon={icons.plus}
+                icon={icons.create}
                 color={color}
                 name={"Create/Join"}
                 focused={focused}

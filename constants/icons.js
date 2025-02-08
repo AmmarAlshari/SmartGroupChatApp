@@ -13,6 +13,8 @@ import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
 import groups from "../assets/icons/groups.png";
 import github from "../assets/icons/github.png";
+import file from "../assets/icons/file.png";
+import create from "../assets/icons/create.png";
 
 export default {
   play,
@@ -30,4 +32,6 @@ export default {
   eye,
   groups,
   github,
+  file,
+  create,
 };

@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { databases, config } from "../lib/Chats";
+import { databases, config, handleFilePick } from "../lib/Chats";
 import { ID, Query } from "react-native-appwrite";
 import { getCurrentUser } from "../lib/appwrite";
 import MessageBody from "../components/MessageBody";
@@ -35,10 +35,10 @@ const ChatScreen = () => {
     fetchCurrentUser();
     fetchGroupDetails();
 
-    // Set up polling to fetch messages every 3 seconds
+    // Set up polling to fetch messages every 4 seconds
     const interval = setInterval(() => {
       fetchMessages();
-    }, 2000);
+    }, 4000);
 
     // Clean up interval on unmount
     return () => {
@@ -46,6 +46,10 @@ const ChatScreen = () => {
     };
   }, []);
 
+  //function to handle file pick
+  const onFilePick = () => {
+    handleFilePick(handleSendMessage);
+  };
   // Fetch messages for the group
   const fetchMessages = async () => {
     try {
@@ -80,7 +84,7 @@ const ChatScreen = () => {
   };
 
   // Handle sending a new message or editing an existing message
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (text, fileUrl = null) => {
     if (!currentUser) return;
 
     if (editingMessage) {
@@ -110,9 +114,11 @@ const ChatScreen = () => {
             groupId: groupId,
             senderId: currentUser.$id,
             senderName: currentUser.username,
-            body: newMessage,
+            body: fileUrl ? `File: ${text}` : newMessage,
             timestamp: new Date().toISOString(),
-            edited: false, // Initialize edited as false for new messages
+            edited: false,
+            fileUrl: fileUrl,
+            // Initialize edited as false for new messages
           }
         );
         setNewMessage("");
@@ -207,6 +213,14 @@ const ChatScreen = () => {
           className="flex-row py-2  border-gray-300 items-center justify-center"
           style={{ backgroundColor: "rgba(44, 44, 44, 0.1)" }}
         >
+          <TouchableOpacity onPress={onFilePick} className="p-3 m-1">
+            <Image
+              source={icons.plus}
+              className="w-6 h-6"
+              resizeMode="contain"
+              style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
+            />
+          </TouchableOpacity>
           <TextInput
             className="flex-1 h-11 items-center text-white font-pmedium rounded-full px-3 mr-4 ml-4 text-sm"
             style={{ backgroundColor: "rgba(44, 44, 44, 0.2)" }}
@@ -215,7 +229,7 @@ const ChatScreen = () => {
             onChangeText={setNewMessage}
           />
           <TouchableOpacity
-            className="py-4 px-6 mr-2"
+            className="p-3 m-1"
             onPress={handleSendMessage}
           >
             <Text className="text-white font-pregular">

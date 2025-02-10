@@ -23,7 +23,7 @@ export default function App() {
           <View className="relative mt-1">
             <Text className="text-3xl text-white font-bold text-center">
               Secure chats made simple! with{" "}
-              <Text className="text-blue-400">SGCOA</Text>
+              <Text className="text-blue-400">Smart Group Chat App</Text>
             </Text>
             <Text className="text-sm font-pregular text-gray-100 mt-7 text-center">
               Where safety meets connection—group chats made secure and easy!

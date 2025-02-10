@@ -51,6 +51,11 @@ const CreateJoin = () => {
   };
 
   // Handle form submission to create or find a group
+  const generateAvatarUrl = (name) => {
+    const initial = name; // Use the first letter found in the name
+    return `https://ui-avatars.com/api/?name=${initial}&background=random&color=fff`;
+  };
+
   const handleSubmit = async () => {
     if (!currentUser) return;
 
@@ -83,6 +88,7 @@ const CreateJoin = () => {
         navigation.navigate("home", { groupId: existingGroup.$id }); // Navigate to home with existing group
       } else {
         // Create new group
+        const avatarUrl = generateAvatarUrl(groupName);
         const newGroup = await databases.createDocument(
           config.databaseId,
           config.groupId,
@@ -91,7 +97,8 @@ const CreateJoin = () => {
             name: groupName,
             section: sectionNumber,
             userId: currentUser.$id, // Use currentUser.$id
-            participants: [currentUser.$id], // Add current user to participants
+            participants: [currentUser.$id],
+            avatar: avatarUrl, // Add current user to participants
           }
         );
         console.log("New Group:", newGroup);

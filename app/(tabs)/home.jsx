@@ -1,5 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, Text, FlatList, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  Image,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { databases, config, RealtimeEvent } from "../../lib/Chats";
@@ -14,13 +21,19 @@ const Home = () => {
   const [filteredGroups, setFilteredGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const navigation = useNavigation();
 
   // Fetch current user and groups
+  const generateAvatarUrl = (name) => {
+    return `https://cloud.appwrite.io/v1/avatars/initials?name=${name}&project=${config.projectId}`;
+  };
+
   const fetchUserAndGroups = async () => {
     try {
       const user = await getCurrentUser();
       setCurrentUser(user);
+      setAvatarUrl(generateAvatarUrl(user.username));
       const response = await databases.listDocuments(
         config.databaseId,
         config.groupId,
@@ -38,7 +51,7 @@ const Home = () => {
             ]
           );
           const lastMessage = messagesResponse.documents[0];
-          return { ...group, lastMessage };
+          return { ...group, lastMessage, avatar: group.avatar };
         })
       );
       setGroups(groupsWithLastMessage);
@@ -102,14 +115,25 @@ const Home = () => {
         }
         ListHeaderComponent={() => (
           <View className="my-6 px-4 space-y-6">
-            <View className="flex-row justify-between items-start mb-6">
-              <View>
+            <View className="relative flex-row justify-between items-start mb-6">
+              <View className="relative z-10 mt-4">
+                {/* Add margin-top here */}
                 <Text className="text-1xl text-gray-100 font-semibold">
                   Welcome back
                 </Text>
-                <Text className="text-2xl font-semibold text-blue-400">
-                  {currentUser?.username}
-                </Text>
+                <View className="flex-row items-center mt-2">
+                  <Image
+                    source={{ uri: avatarUrl }} // Use the avatar URL
+                    className="w-10 h-10 rounded-lg mr-2"
+                    resizeMode="contain"
+                    style={
+                      Platform.OS === "web" ? { width: 40, height: 40 } : {}
+                    }
+                  />
+                  <Text className="text-2xl font-semibold text-blue-400">
+                    {currentUser?.username}
+                  </Text>
+                </View>
               </View>
             </View>
             <SearchInput onSearch={handleSearch} />

@@ -119,26 +119,34 @@ const GroupItem = ({ item, currentUser, fetchGroups }) => {
   };
 
   return (
-    <View className="p-4 mb-4 shadow flex-row items-center border-black-100 border-y-1 rounded-lg">
-      <TouchableOpacity className="flex-1" onPress={handleJoinGroup}>
-        <Text className="text-xl text-blue-400 font-pregular">
-          {item.name} -<Text> {item.section} </Text>
-        </Text>
-        {item.lastMessage && (
-          <Text
-            className={`text-sm mt-1 ${
-              hasNewMessages ? "text-green-500" : "text-gray-500"
-            }`}
-          >
-            {item.lastMessage.body}
-          </Text>
-        )}
+    <View className="p-4 mb-4 shadow flex-row items-center border-black-100 border-y-1 rounded-lg relative">
+      <TouchableOpacity className="flex-1 p-1" onPress={handleJoinGroup}>
+        <View className="relative">
+          <Image
+            source={{ uri: item.avatar }}
+            className="w-10 h-10 rounded-full absolute top-1/2 left-0 transform -translate-y-1/2 opacity-60"
+          />
+          <View className="ml-16">
+            <Text className="text-xl text-blue-400 font-pregular">
+              {item.name} -<Text> {item.section} </Text>
+            </Text>
+            {item.lastMessage && (
+              <Text
+                className={`text-sm mt-1 ${
+                  hasNewMessages ? "text-green-500" : "text-gray-500"
+                }`}
+              >
+                {item.lastMessage.body}
+              </Text>
+            )}
+          </View>
+        </View>
       </TouchableOpacity>
-      <Image
+      {/* <Image
         source={icons.groups}
-        className="w-7 h-7 m-2 border"
+        className="w-7 h-7 m-2"
         style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
-      />
+      /> */}
       {hasNewMessages && (
         <View className="bg-green-500 w-3 h-3 rounded-full ml-2" />
       )}

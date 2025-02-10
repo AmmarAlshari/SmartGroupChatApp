@@ -49,7 +49,7 @@ const SignIn = () => {
           <Image
             source={images.logo}
             resizeMode="contain"
-            className="w-[115px] h-[75px]"
+            className="w-[130px] h-[120px]"
             style={Platform.OS === "web" ? { width: 150, height: 170 } : {}}
           />
           <Text className="text-2xl text-white text-semibold mt-10 font-psemibold">

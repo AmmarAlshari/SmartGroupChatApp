@@ -13,14 +13,13 @@ import {
 import { useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  databases,
-  config,
   handleFilePick,
+  handleSendMessage,
   RealtimeEvent,
   RealtimeFileEvent,
 } from "../lib/Chats";
-import { ID, Query } from "react-native-appwrite";
-import { getCurrentUser } from "../lib/appwrite";
+import { Query } from "react-native-appwrite";
+import { config, databases, getCurrentUser } from "../lib/appwrite";
 import MessageBody from "../components/MessageBody";
 import icons from "../constants/icons";
 import images from "../constants/images";
@@ -71,7 +70,19 @@ const ChatScreen = () => {
 
   //function to handle file pick
   const onFilePick = () => {
-    handleFilePick(handleSendMessage);
+    handleFilePick((fileName, fileUrl) =>
+      handleSendMessage(
+        fileName,
+        fileUrl,
+        currentUser,
+        groupId,
+        newMessage,
+        setNewMessage,
+        editingMessage,
+        setEditingMessage,
+        fetchMessages
+      )
+    );
   };
   // Fetch messages for the group
   const fetchMessages = async () => {
@@ -104,50 +115,6 @@ const ChatScreen = () => {
       setGroupName(response.name);
       setSectionNumber(response.section);
     } catch (error) {}
-  };
-
-  // Handle sending a new message or editing an existing message
-  const handleSendMessage = async (text, fileUrl = null) => {
-    if (!currentUser) return;
-
-    if (editingMessage) {
-      // Edit existing message
-      try {
-        await databases.updateDocument(
-          config.databaseId,
-          config.messagesCollectionId,
-          editingMessage.$id,
-          {
-            body: newMessage,
-            edited: true,
-          }
-        );
-        setEditingMessage(null);
-        setNewMessage("");
-        fetchMessages();
-      } catch (error) {}
-    } else {
-      // Send new message
-      try {
-        await databases.createDocument(
-          config.databaseId,
-          config.messagesCollectionId,
-          ID.unique(),
-          {
-            groupId: groupId,
-            senderId: currentUser.$id,
-            senderName: currentUser.username,
-            body: fileUrl ? `File: ${text}` : newMessage,
-            timestamp: new Date().toISOString(),
-            edited: false,
-            fileUrl: fileUrl,
-            // Initialize edited as false for new messages
-          }
-        );
-        setNewMessage("");
-        fetchMessages();
-      } catch (error) {}
-    }
   };
 
   // Handle deleting a message
@@ -245,13 +212,28 @@ const ChatScreen = () => {
             />
           </TouchableOpacity>
           <TextInput
-            className="flex-1 h-11 items-center text-white font-pmedium rounded-full px-3 mr-4 ml-4 text-sm"
+            className="flex-1 h-11 items-center text-white font-pmedium rounded-full px-3 mr-4 ml-4 text-medium"
             style={{ backgroundColor: "rgba(44, 44, 44, 0.2)" }}
             placeholder=""
             value={newMessage}
             onChangeText={setNewMessage}
           />
-          <TouchableOpacity className="p-3 m-1" onPress={handleSendMessage}>
+          <TouchableOpacity
+            className="p-3 m-1"
+            onPress={() =>
+              handleSendMessage(
+                newMessage,
+                null,
+                currentUser,
+                groupId,
+                newMessage,
+                setNewMessage,
+                editingMessage,
+                setEditingMessage,
+                fetchMessages
+              )
+            }
+          >
             <Text className="text-white font-pregular">
               {editingMessage ? (
                 "Edit"

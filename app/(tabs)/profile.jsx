@@ -10,11 +10,15 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
-import { getCurrentUser, signOut, updateUsername } from "../../lib/appwrite";
+import {
+  config,
+  databases,
+  getCurrentUser,
+  signOut,
+  updateUsername,
+} from "../../lib/appwrite";
 import ChangeUsername from "../../components/ChangeUsername";
 import { Query } from "react-native-appwrite";
-import { config } from "../../lib/Chats";
-import { databases } from "../../lib/Chats";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../../components/CustomButton";
 import icons from "../../constants/icons";
@@ -31,11 +35,12 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
 
-  // Fetch the current user and their groups when the component mounts
   // Function to generate avatar URL based on username
   const generateAvatarUrl = (name) => {
     return `https://cloud.appwrite.io/v1/avatars/initials?name=${name}&project=${config.projectId}`;
   };
+
+  // Fetch the current user and their groups when the component mounts
   const fetchUserAndGroups = async () => {
     try {
       const user = await getCurrentUser();
@@ -138,7 +143,7 @@ const Profile = () => {
             className="text-white font-psemibold my-10"
             style={Platform.OS === "web" ? { margin: 20 } : {}}
           >
-            Total group chats {" "}
+            Total group chats{" "}
             <Text className="text-blue-400 text-medium font-bold text-center items-center">
               {groupCount}
             </Text>

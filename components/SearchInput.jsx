@@ -1,4 +1,10 @@
-import { View, TextInput, Image, TouchableOpacity, Platform } from "react-native";
+import {
+  View,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import React, { useState } from "react";
 import { icons } from "../constants";
 
@@ -23,7 +29,12 @@ const SearchInput = ({ onSearch }) => {
         onChangeText={handleChangeText}
       />
       <TouchableOpacity onPress={handleSearch}>
-        <Image source={icons.search} className="w-5 h-5" style={Platform.OS === "web" ? { width: 24, height: 24 } : {}} resizeMode="contain" />
+        <Image
+          source={icons.search}
+          className="w-5 h-5"
+          style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
+          resizeMode="contain"
+        />
       </TouchableOpacity>
     </View>
   );

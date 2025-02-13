@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { databases, config, RealtimeEvent } from "../../lib/Chats";
+import { RealtimeEvent } from "../../lib/Chats";
 import { Query } from "react-native-appwrite";
-import { getCurrentUser } from "../../lib/appwrite";
+import { config, databases, getCurrentUser } from "../../lib/appwrite";
 import SearchInput from "../../components/SearchInput";
 import EmptyState from "../../components/EmptyState";
 import GroupItem from "../../components/GroupItem";

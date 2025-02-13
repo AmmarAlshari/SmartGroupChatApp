@@ -24,7 +24,7 @@ const SignUp = () => {
       setEmailError(false);
     }
   };
-  // check if password contains uppercase, lowercase and numbers  length (6)
+  // check if password contains uppercase, lowercase and numbers  length (6>)
   const validatePassword = (password) => {
     const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[a-zA-Z]).{6,}$/;
     if (!regex.test(password)) {
@@ -47,7 +47,6 @@ const SignUp = () => {
     setIsSubmitting(true);
     try {
       const result = await createUser(form.email, form.password, form.username);
-      console.log(result);
 
       router.replace("/Verification");
       Alert.alert(

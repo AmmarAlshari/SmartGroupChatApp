@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
-import { icons } from "../constants";
+import React from "react";
+import { View, Text, TextInput } from "react-native";
 
 // Form field component for username, email, and password
 const CreateField = ({
@@ -11,8 +10,6 @@ const CreateField = ({
   otherStyles,
   ...props
 }) => {
-  const [showPassword, setShowPassword] = useState(false);
-
   return (
     <View className={`space-y-4 ${otherStyles}`}>
       <Text className="text-base text-gray-100 font-pmedium py-2">{title}</Text>

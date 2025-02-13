@@ -9,9 +9,8 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { databases, config } from "../../lib/Chats";
 import { ID, Query } from "react-native-appwrite";
-import { getCurrentUser } from "../../lib/appwrite";
+import { config, databases, getCurrentUser } from "../../lib/appwrite";
 import CreateField from "../../components/CreateField";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../../components/CustomButton";
@@ -71,8 +70,6 @@ const CreateJoin = () => {
       if (response.documents.length > 0) {
         // Group already exists
         const existingGroup = response.documents[0];
-        console.log("Existing Group:", existingGroup);
-
         // Add current user to the group's participants if not already added
         if (!existingGroup.participants.includes(currentUser.$id)) {
           await databases.updateDocument(
@@ -101,7 +98,6 @@ const CreateJoin = () => {
             avatar: avatarUrl, // Add current user to participants
           }
         );
-        console.log("New Group:", newGroup);
         navigation.navigate("home", { groupId: newGroup.$id }); // Navigate to home with new group
       }
     } catch (error) {

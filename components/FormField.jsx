@@ -1,4 +1,11 @@
-import { View, Text, TextInput, Image, TouchableOpacity, Platform } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import React, { useState } from "react";
 import { icons } from "../constants";
 // form field component for username and email and password

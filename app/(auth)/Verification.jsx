@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, Button } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { account } from "../../lib/appwrite"; // Adjust the import based on your project structure
+import { account } from "../../lib/appwrite";
 import { useRouter } from "expo-router";
 
 const Verification = () => {
@@ -22,12 +22,6 @@ const Verification = () => {
       }
 
       try {
-        console.log(
-          "Verifying email with userId:",
-          userId,
-          "and secret:",
-          secret
-        );
         // updateVerification is a method from the Appwrite SDK passing the userId and secret
         await account.updateVerification(userId, secret);
         setMessage("Email verified successfully!");
@@ -51,7 +45,7 @@ const Verification = () => {
   }, [loading, message, router]);
 
   useEffect(() => {
-    // Check if the email is verified every 5 seconds
+    // Check if the email is verified every 15 seconds
     const checkEmailVerification = async () => {
       try {
         const user = await account.get();
@@ -62,7 +56,7 @@ const Verification = () => {
       } catch (error) {}
     };
 
-    const intervalId = setInterval(checkEmailVerification, 10000); // Check every 10 seconds
+    const intervalId = setInterval(checkEmailVerification, 15000); // Check every 15 seconds
 
     return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);

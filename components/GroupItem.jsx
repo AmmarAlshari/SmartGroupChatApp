@@ -8,9 +8,9 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { databases, config } from "../lib/Chats";
 import icons from "../constants/icons";
 import { Query } from "react-native-appwrite";
+import { config, databases } from "../lib/appwrite";
 
 const GroupItem = ({ item, currentUser, fetchGroups }) => {
   const navigation = useNavigation();
@@ -142,11 +142,6 @@ const GroupItem = ({ item, currentUser, fetchGroups }) => {
           </View>
         </View>
       </TouchableOpacity>
-      {/* <Image
-        source={icons.groups}
-        className="w-7 h-7 m-2"
-        style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
-      /> */}
       {hasNewMessages && (
         <View className="bg-green-500 w-3 h-3 rounded-full ml-2" />
       )}

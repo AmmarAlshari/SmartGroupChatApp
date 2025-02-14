@@ -23,6 +23,7 @@ const CreateJoin = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(null);
 
   // Fetch the current user when the component mounts
   useEffect(() => {
@@ -61,6 +62,45 @@ const CreateJoin = () => {
     if (!validateFields()) return;
 
     try {
+      // Check if the user was kicked out and if 5 minutes have passed
+      let userWarnings;
+      try {
+        userWarnings = await databases.getDocument(
+          config.databaseId,
+          config.warningsCollectionId,
+          currentUser.$id
+        );
+      } catch (error) {
+        if (error.code !== 404) {
+          throw error;
+        }
+      }
+
+      if (userWarnings && userWarnings.kickoutTime) {
+        const kickoutTime = new Date(userWarnings.kickoutTime);
+        const currentDate = new Date();
+        const minutesDifference = Math.abs(currentDate - kickoutTime) / 60000;
+
+        if (minutesDifference < 5) {
+          const remainingMinutes = 5 - Math.floor(minutesDifference);
+          const remainingSeconds =
+            60 - (Math.floor((currentDate - kickoutTime) / 1000) % 60);
+          setRemainingTime(
+            `${remainingMinutes}:${
+              remainingSeconds < 10 ? "0" : ""
+            }${remainingSeconds}`
+          );
+          return;
+        } else {
+          // Delete the warning document after 5 minutes
+          await databases.deleteDocument(
+            config.databaseId,
+            config.warningsCollectionId,
+            currentUser.$id
+          );
+        }
+      }
+
       const response = await databases.listDocuments(
         config.databaseId,
         config.groupId,
@@ -70,6 +110,8 @@ const CreateJoin = () => {
       if (response.documents.length > 0) {
         // Group already exists
         const existingGroup = response.documents[0];
+        console.log("Group already exists:", existingGroup);
+
         // Add current user to the group's participants if not already added
         if (!existingGroup.participants.includes(currentUser.$id)) {
           await databases.updateDocument(
@@ -80,6 +122,7 @@ const CreateJoin = () => {
               participants: [...existingGroup.participants, currentUser.$id],
             }
           );
+          console.log("User added to existing group:", existingGroup.$id);
         }
 
         navigation.navigate("home", { groupId: existingGroup.$id }); // Navigate to home with existing group
@@ -98,12 +141,32 @@ const CreateJoin = () => {
             avatar: avatarUrl, // Add current user to participants
           }
         );
+        console.log("New group created:", newGroup);
         navigation.navigate("home", { groupId: newGroup.$id }); // Navigate to home with new group
       }
     } catch (error) {
       console.error("Error creating or finding group:", error);
     }
   };
+
+  // Update the countdown timer every second
+  useEffect(() => {
+    if (remainingTime) {
+      const interval = setInterval(() => {
+        const [minutes, seconds] = remainingTime.split(":").map(Number);
+        if (minutes === 0 && seconds === 0) {
+          setRemainingTime(null);
+        } else {
+          const newSeconds = seconds === 0 ? 59 : seconds - 1;
+          const newMinutes = seconds === 0 ? minutes - 1 : minutes;
+          setRemainingTime(
+            `${newMinutes}:${newSeconds < 10 ? "0" : ""}${newSeconds}`
+          );
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [remainingTime]);
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -138,15 +201,25 @@ const CreateJoin = () => {
             handleChangeText={setSectionNumber}
             otherStyles="mt-10"
           />
-          <View className="flex-row justify-center mt-4">
-            <CustomButton
-              title="Submit"
-              handlePress={handleSubmit}
-              isLoading={isLoading}
-              containerStyles="bg-blue-400 py-2 px-4 rounded w-full my-2"
-              textStyles="text-white font-pmedium"
-            />
-          </View>
+          {remainingTime && (
+            <View className="flex-row justify-center mt-4">
+              <Text className="text-red-500 font-pmedium">
+                You are not allowd to create or join group. Please wait{" "}
+                {remainingTime} before trying.
+              </Text>
+            </View>
+          )}
+          {!remainingTime && (
+            <View className="flex-row justify-center mt-4">
+              <CustomButton
+                title="Submit"
+                handlePress={handleSubmit}
+                isLoading={isLoading}
+                containerStyles="bg-blue-400 py-2 px-4 rounded w-full my-2"
+                textStyles="text-white font-pmedium"
+              />
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { RealtimeEvent } from "../../lib/Chats";
+import { RealtimeEvent, RealtimeGroupEvent } from "../../lib/Chats";
 import { Query } from "react-native-appwrite";
 import { config, databases, getCurrentUser } from "../../lib/appwrite";
 import SearchInput from "../../components/SearchInput";
@@ -23,6 +23,42 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const navigation = useNavigation();
+
+  // Handle real-time events for group creation and last message
+  useEffect(() => {
+    const unsubscribeMessages = RealtimeEvent((response) => {
+      if (
+        response.events.includes(
+          "databases.*.collections.*.documents.*.create"
+        ) ||
+        response.events.includes(
+          "databases.*.collections.*.documents.*.update"
+        ) ||
+        response.events.includes("databases.*.collections.*.documents.*.delete")
+      ) {
+        fetchUserAndGroups();
+      }
+    });
+
+    const unsubscribeGroups = RealtimeGroupEvent((response) => {
+      if (
+        response.events.includes(
+          "databases.*.collections.*.documents.*.create"
+        ) ||
+        response.events.includes(
+          "databases.*.collections.*.documents.*.update"
+        ) ||
+        response.events.includes("databases.*.collections.*.documents.*.delete")
+      ) {
+        fetchUserAndGroups();
+      }
+    });
+
+    return () => {
+      unsubscribeMessages();
+      unsubscribeGroups();
+    };
+  }, []);
 
   // Fetch current user and groups
   const generateAvatarUrl = (name) => {
@@ -83,20 +119,6 @@ const Home = () => {
       setFilteredGroups(groups);
     }
   };
-  // handlinig the realtime event for the last message
-  useEffect(() => {
-    const unsubscribe = RealtimeEvent((response) => {
-      if (
-        response.events.includes("databases.*.collections.*.documents.*.create")
-      ) {
-        fetchUserAndGroups();
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
 
   return (
     <SafeAreaView className="bg-primary flex-1">

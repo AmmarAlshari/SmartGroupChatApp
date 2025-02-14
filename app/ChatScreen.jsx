@@ -58,6 +58,7 @@ const ChatScreen = () => {
     // Subscribe to file events
     const unsubscribeFiles = RealtimeFileEvent((response) => {
       if (response.events.includes("buckets.*.files.*.create")) {
+        fetchMessages();
       }
     });
 

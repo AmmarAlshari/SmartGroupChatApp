@@ -45,25 +45,25 @@ SmartGroupChatApp is a group chat application designed to facilitate communicati
    expo start
    ```
 
-Usage:
+   Usage:
 
-   1. Sign Up / Log In: Create an account or log in to an existing account.
-   2. Create / Join Group: Create a new group or join an existing group by providing the group name and section number.
-   3. Send Messages: Send text messages or share files within the group.
-   4. Manage Users: Admins can warn or kick out users for suspicious behavior.
+      1. Sign Up / Log In: Create an account or log in to an existing account.
+      2. Create / Join Group: Create a new group or join an existing group by providing the group name and section number.
+      3. Send Messages: Send text messages or share files within the group.
+      4. Manage Users: Admins can warn or kick out users for suspicious behavior.
 
-Suspicious Content Detection:
-
-The app includes a mechanism to detect and warn users about suspicious content. The list of suspicious words can be found in the AI-Mod.js file. When a user sends a message containing suspicious words, they will receive a warning. After multiple warnings, the user will be kicked out of the group.
-
-Contributing:
-
-Contributions are welcome! Please fork the repository and create a pull request with your changes.
-
-License:
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-Contact:
-
-For any questions or inquiries, please contact aalshaaery@gmail.com
+   Suspicious Content Detection:
+   
+   The app includes a mechanism to detect and warn users about suspicious content. The list of suspicious words can be found in the AI-Mod.js file. When a user sends a message containing suspicious words, they will receive a warning. After multiple warnings, the user will be kicked out of the group.
+   
+   Contributing:
+   
+   Contributions are welcome! Please fork the repository and create a pull request with your changes.
+   
+   License:
+   
+   This project is licensed under the MIT License. See the LICENSE file for details.
+   
+   Contact:
+   
+   For any questions or inquiries, please contact aalshaaery@gmail.com

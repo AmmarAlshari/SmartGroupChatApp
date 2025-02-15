@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, Alert } from "react-native";
+import { View, Text, ScrollView, Image, Alert, Platform } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FormField from "../../components/FormField";
@@ -49,7 +49,8 @@ const SignIn = () => {
           <Image
             source={images.logo}
             resizeMode="contain"
-            className="w-[115px] h-[75px]"
+            className="w-[130px] h-[120px]"
+            style={Platform.OS === "web" ? { width: 150, height: 170 } : {}}
           />
           <Text className="text-2xl text-white text-semibold mt-10 font-psemibold">
             Log in to {""} <Text className="text-blue-400">SGCOA</Text>

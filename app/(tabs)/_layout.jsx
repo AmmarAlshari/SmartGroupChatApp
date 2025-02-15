@@ -1,6 +1,6 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Platform } from "react-native";
 import React from "react";
-import { Tabs, Redirect } from "expo-router";
+import { Tabs } from "expo-router";
 import { icons } from "../../constants";
 
 const TabsIcon = ({ icon, color, name, focused }) => {
@@ -11,6 +11,7 @@ const TabsIcon = ({ icon, color, name, focused }) => {
         resizeMode="contain"
         tintColor={color}
         className="w-6 h-6"
+        style={Platform.OS === "web" ? { width: 25, height: 25 } : {}}
       />
       <Text
         className={`${
@@ -69,7 +70,7 @@ const TabsLayout = () => {
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabsIcon
-                icon={icons.plus}
+                icon={icons.create}
                 color={color}
                 name={"Create/Join"}
                 focused={focused}

@@ -16,7 +16,7 @@ const SignUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-
+  // chck if email contains 'edu'
   const validateEmail = (email) => {
     if (!email.includes("edu")) {
       setEmailError(true);
@@ -24,7 +24,7 @@ const SignUp = () => {
       setEmailError(false);
     }
   };
-
+  // check if password contains uppercase, lowercase and numbers  length (6>)
   const validatePassword = (password) => {
     const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[a-zA-Z]).{6,}$/;
     if (!regex.test(password)) {
@@ -36,7 +36,7 @@ const SignUp = () => {
 
   const submit = async () => {
     if (form.username === "" || form.email === "" || form.password === "") {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert("Error", "Please fill in all fields"); //check if all fields are not filled
     }
 
     if (emailError || passwordError) {
@@ -47,7 +47,12 @@ const SignUp = () => {
     setIsSubmitting(true);
     try {
       const result = await createUser(form.email, form.password, form.username);
-      router.replace("/home");
+
+      router.replace("/Verification");
+      Alert.alert(
+        "Verification Email Sent",
+        "Please check your email to verify your account."
+      );
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {

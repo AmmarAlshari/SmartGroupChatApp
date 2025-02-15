@@ -1,40 +1,173 @@
-import { View, Text, FlatList, Image } from "react-native";
-import React from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  Image,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { images } from "../../constants";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { RealtimeEvent, RealtimeGroupEvent } from "../../lib/Chats";
+import { Query } from "react-native-appwrite";
+import { config, databases, getCurrentUser } from "../../lib/appwrite";
 import SearchInput from "../../components/SearchInput";
 import EmptyState from "../../components/EmptyState";
+import GroupItem from "../../components/GroupItem";
 
 const Home = () => {
+  const [groups, setGroups] = useState([]);
+  const [filteredGroups, setFilteredGroups] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const navigation = useNavigation();
+
+  // Handle real-time events for group creation and last message
+  useEffect(() => {
+    const unsubscribeMessages = RealtimeEvent((response) => {
+      if (
+        response.events.includes(
+          "databases.*.collections.*.documents.*.create"
+        ) ||
+        response.events.includes(
+          "databases.*.collections.*.documents.*.update"
+        ) ||
+        response.events.includes("databases.*.collections.*.documents.*.delete")
+      ) {
+        fetchUserAndGroups();
+      }
+    });
+
+    const unsubscribeGroups = RealtimeGroupEvent((response) => {
+      if (
+        response.events.includes(
+          "databases.*.collections.*.documents.*.create"
+        ) ||
+        response.events.includes(
+          "databases.*.collections.*.documents.*.update"
+        ) ||
+        response.events.includes("databases.*.collections.*.documents.*.delete")
+      ) {
+        fetchUserAndGroups();
+      }
+    });
+
+    return () => {
+      unsubscribeMessages();
+      unsubscribeGroups();
+    };
+  }, []);
+
+  // Fetch current user and groups
+  const generateAvatarUrl = (name) => {
+    return `https://cloud.appwrite.io/v1/avatars/initials?name=${name}&project=${config.projectId}`;
+  };
+
+  const fetchUserAndGroups = async () => {
+    try {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+      setAvatarUrl(generateAvatarUrl(user.username));
+      const response = await databases.listDocuments(
+        config.databaseId,
+        config.groupId,
+        [Query.search("participants", user.$id)]
+      );
+      const groupsWithLastMessage = await Promise.all(
+        response.documents.map(async (group) => {
+          const messagesResponse = await databases.listDocuments(
+            config.databaseId,
+            config.messagesCollectionId,
+            [
+              Query.equal("groupId", group.$id),
+              Query.orderDesc("timestamp"),
+              Query.limit(1),
+            ]
+          );
+          const lastMessage = messagesResponse.documents[0];
+          return { ...group, lastMessage, avatar: group.avatar };
+        })
+      );
+      setGroups(groupsWithLastMessage);
+      setFilteredGroups(groupsWithLastMessage);
+    } catch (error) {}
+  };
+
+  // Handle pull-to-refresh functionality
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchUserAndGroups().then(() => setRefreshing(false));
+  }, []);
+
+  // Fetch user and groups when the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserAndGroups();
+    }, [])
+  );
+
+  // Handle search functionality
+  const handleSearch = (query) => {
+    if (query) {
+      const filtered = groups.filter((group) =>
+        group.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredGroups(filtered);
+    } else {
+      setFilteredGroups(groups);
+    }
+  };
+
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView className="bg-primary flex-1">
       <FlatList
-        // data={[{ id: 1 }, { id: 2 }, { id: 3 }]}
-        data={[]}
+        data={filteredGroups}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
-          <Text className="text-3xl text-white">{item.id}</Text>
+          <GroupItem
+            item={item}
+            currentUser={currentUser}
+            fetchGroups={fetchUserAndGroups}
+          />
         )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         ListHeaderComponent={() => (
           <View className="my-6 px-4 space-y-6">
-            <View className="justify-between items-start flex-row mb-6">
-              <View>
-                <Text className="font-pmedium text-sm text-gray-100">
+            <View className="relative flex-row justify-between items-start mb-6">
+              <View className="relative z-10 mt-4">
+                {/* Add margin-top here */}
+                <Text className="text-1xl text-gray-100 font-semibold">
                   Welcome back
                 </Text>
-                <Text className="text-2xl font-psemibold text-blue-400">
-                  Ammar
-                </Text>
+                <View className="flex-row items-center mt-2">
+                  <Image
+                    source={{ uri: avatarUrl }} // Use the avatar URL
+                    className="w-10 h-10 rounded-lg mr-2"
+                    resizeMode="contain"
+                    style={
+                      Platform.OS === "web" ? { width: 40, height: 40 } : {}
+                    }
+                  />
+                  <Text className="text-2xl font-semibold text-blue-400">
+                    {currentUser?.username}
+                  </Text>
+                </View>
               </View>
             </View>
-            <SearchInput />
+            <SearchInput onSearch={handleSearch} />
           </View>
         )}
-        ListEmptyComponent={()=>(
+        ListEmptyComponent={() => (
           <EmptyState
-          title="No chats found"
-          subtitle="Create or join new chats"/>
+            title="No Groups Found"
+            description="You haven't joined any groups yet. Start by finding a group that interests you."
+          />
         )}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
       />
     </SafeAreaView>
   );

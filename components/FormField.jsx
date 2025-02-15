@@ -1,4 +1,11 @@
-import { View, Text, TextInput, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import React, { useState } from "react";
 import { icons } from "../constants";
 // form field component for username and email and password
@@ -30,6 +37,7 @@ const FormField = ({
               source={!showPassword ? icons.eyeHide : icons.eye}
               className="w-6 h-6"
               resizeMode="contain"
+              style={Platform.OS === "web" ? { width: 24, height: 24 } : {}}
             />
           </TouchableOpacity>
         )}

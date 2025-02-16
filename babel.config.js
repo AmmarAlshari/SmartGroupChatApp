@@ -1,13 +1,20 @@
 module.exports = function (api) {
-    api.cache(true);
-    return {
-      presets: [
-        ["babel-preset-expo", { jsxImportSource: "nativewind" }],
-        "nativewind/babel",
+  api.cache(true);
+  return {
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+    ],
+    plugins: [
+      // Required for expo-router
+      "react-native-reanimated/plugin",
+      [
+        "module:react-native-dotenv",
+        {
+          moduleName: "@env",
+          path: ".env",
+        },
       ],
-      plugins: [
-        // Required for expo-router
-        "react-native-reanimated/plugin",
-      ]
-    };
+    ],
   };
+};

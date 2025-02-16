@@ -1,6 +1,6 @@
 # SmartGroupChatApp
 
-SmartGroupChatApp is a group chat application designed to facilitate communication and collaboration among users. The app includes features such as real-time messaging, file sharing, and user management. It also includes mechanisms to detect and warn users about suspicious content.
+SmartGroupChatApp is a group chat application designed to facilitate communication and collaboration among university studens. The app includes features such as real-time messaging, file sharing, and user management. It also includes mechanisms to detect and warn users about suspicious content.
 
 ## Features
 

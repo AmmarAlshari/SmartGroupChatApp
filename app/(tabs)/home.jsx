@@ -60,6 +60,16 @@ const Home = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Set up an interval to fetch groups every 2 seconds
+    const interval = setInterval(() => {
+      fetchUserAndGroups();
+    }, 7000); // 7000ms = 2 seconds
+  
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch current user and groups
   const generateAvatarUrl = (name) => {
     return `https://cloud.appwrite.io/v1/avatars/initials?name=${name}&project=${config.projectId}`;

@@ -42,6 +42,7 @@ const ChatScreen = () => {
 
     // Subscribe to real-time updates
     const unsubscribeMessages = RealtimeEvent((response) => {
+      console.log("Realtime response:", response);
       if (
         response.events.includes(
           "databases.*.collections.*.documents.*.create"
@@ -55,6 +56,7 @@ const ChatScreen = () => {
       }
     });
 
+   
     // Subscribe to file events
     const unsubscribeFiles = RealtimeFileEvent((response) => {
       if (response.events.includes("buckets.*.files.*.create")) {
@@ -68,6 +70,16 @@ const ChatScreen = () => {
       unsubscribeFiles();
     };
   }, []);
+
+  useEffect(() => {
+    // Set up an interval to fetch messages every 2 seconds
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 1000); // 2000ms = 2 seconds
+  
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
+  }, [groupId]);
 
   //function to handle file pick
   const onFilePick = () => {
